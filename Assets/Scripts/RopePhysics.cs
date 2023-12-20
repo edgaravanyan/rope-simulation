@@ -1,7 +1,9 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Rope : MonoBehaviour
 {
+    // Adjustable parameters
     public int nodeCount = 10;
     public float nodeMass = 1f;
     public float segmentLength = 1f;
@@ -12,6 +14,7 @@ public class Rope : MonoBehaviour
     public float tension = 0.3f;
     public float lineWidth = 0.1f;
 
+    // Node structure to represent each segment of the rope
     private struct Node
     {
         public float mass;
@@ -28,15 +31,18 @@ public class Rope : MonoBehaviour
         }
     }
 
+    // Array to store rope nodes and LineRenderer for visualization
     private Node[] nodes;
     private LineRenderer lineRenderer;
 
+    // Initialization
     void Start()
     {
         InitializeRope();
         CreateLineRenderer();
     }
 
+    // Initialize the rope nodes
     void InitializeRope()
     {
         nodes = new Node[nodeCount];
@@ -44,6 +50,7 @@ public class Rope : MonoBehaviour
         var lastY = 0f;
         var length = nodeCount * segmentLength * 0.5f;
         var x = -length;
+
         for (var i = 0; i < nodeCount; i++)
         {
             x += segmentLength;
@@ -53,6 +60,7 @@ public class Rope : MonoBehaviour
         }
     }
 
+    // Create LineRenderer for visualization
     void CreateLineRenderer()
     {
         lineRenderer = gameObject.AddComponent<LineRenderer>();
@@ -65,14 +73,17 @@ public class Rope : MonoBehaviour
         }
     }
 
+    // Update function called every frame
     void Update()
     {
         SimulateRope();
         UpdateLineRenderer();
     }
 
+    // Simulate the physics of the rope
     void SimulateRope()
     {
+        // Update velocities and apply forces
         for (var i = 1; i < nodeCount - 1; i++)
         {
             nodes[i].velocity += new Vector3(0f, -gravity * Time.deltaTime, 0f);
@@ -86,17 +97,20 @@ public class Rope : MonoBehaviour
             nodes[i].velocity *= 1 - nodes[i].damping * Time.deltaTime;
         }
 
+        // Update positions
         for (var i = 1; i < nodeCount - 1; i++)
         {
             nodes[i].position += nodes[i].velocity * Time.deltaTime;
         }
-        
+
+        // Increase damping gradually
         for (var i = 1; i < nodeCount - 1; i++)
         {
             nodes[i].damping = Mathf.Min(nodes[i].damping + dampingIncreaseRate * Time.deltaTime, maxDamping);
         }
     }
 
+    // Update LineRenderer to reflect current node positions
     void UpdateLineRenderer()
     {
         for (var i = 0; i < nodeCount; i++)
@@ -105,6 +119,7 @@ public class Rope : MonoBehaviour
         }
     }
 
+    // Calculate tension force between two nodes
     Vector3 TensionForce(Node nodeA, Node nodeB)
     {
         var direction = nodeB.position - nodeA.position;
